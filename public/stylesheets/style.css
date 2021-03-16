@@ -1,12 +1,16 @@
 body {
-  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+  padding: 5rem;
 }
 
-a {
-  color: #00B7FF;
+.editor-datetime {
+  position: relative;
 }
-
+.starter-template {
+  padding: 3rem 1.5rem;
+  text-align: center;
+}
 #map {
-	height: 100%;
+	height: 250px;
 	width: 100%;
 }
+
