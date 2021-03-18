@@ -24,16 +24,16 @@
   <main role="main" class="container">    
       <div class="row">
         <div class="col">
-        <form method="post">          
+        <form action="/upload" enctype="multipart/form-data" method="post">          
           <div class="form-group">
-            <label for="kml-upload-control">1. Upload your KML</label>
-            <input type="file" class="form-control-file" id="kml-upload-control">
-            <small id="uploadhelp" class="form-text text-muted">Upload your flight plan KML from your GCS</small>
+            <label for="geojson-upload-control">1. Upload your GeoJSON</label>
+            <input onchange="preview_operation()" type="file" class="form-control-file" id="geojson-upload-control">
+            <small id="uploadhelp" class="form-text text-muted">Upload your flight plan GeoJSON from your GCS</small>
           </div>
           
           <div class="form-group">
-            <label for="op-datetime">2. Opearation datetme:</label>
-            <input id="op-datetime" type="text" name="datetimes" />
+            <label for="op-datetime">2. Operation datetme:</label>
+            <input style="width:300px;" id="op-datetime" type="text" name="datetimes" />
           </div>
           
           <label for="operation_type">3. Operation Type</label>
@@ -52,9 +52,6 @@
         </div>
 
       </div>
-
-
-
   </main>
 
   <footer class="text-muted">
@@ -88,6 +85,21 @@
     }
   });
 });
+// var geoJSONToRead =document.getElementById('geojson-upload-control');
+function preview_operation() {
+  
+  const file = document.getElementById('geojson-upload-control').files[0];
+  const reader = new FileReader();
+
+  reader.addEventListener("load", function () {
+    // convert image file to base64 string
+    console.log(reader.result);
+  }, false);
+
+  if (file) {
+    reader.readAsDataURL(file);
+  }
+}
  </script>
 </body>
 

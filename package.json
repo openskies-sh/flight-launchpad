@@ -12,6 +12,7 @@
     "debug": "~2.6.9",
     "express": "~4.16.1",
     "leaflet": "^1.7.1",
+    "formidable": "^1.2.2",
     "morgan": "~1.9.1"
   }
 }
