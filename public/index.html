@@ -1,0 +1,88 @@
+<html>
+
+<head>
+  <title>Flight Launchpad</title>
+  <link rel="stylesheet" href="/stylesheets/bootstrap.min.css">
+  <link rel="stylesheet" href="/stylesheets/bootstrap-daterangepicker.css">
+  <link rel="stylesheet" href="/stylesheets/style.css">
+  <link rel="stylesheet" href="/stylesheets/leaflet.css">
+</head>
+
+<body>
+
+  <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
+
+    <div class="collapse navbar-collapse" id="navbarsExampleDefault">
+      <ul class="navbar-nav mr-auto">
+        <li class="nav-item active">
+          <a class="nav-link" href="#">Flight Lanuchpad <span class="sr-only">(current)</span></a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+  <main role="main" class="container">
+    <div class="row">
+
+      <form action="upload" enctype="multipart/form-data" method="post">
+        <div class="form-group">
+          <label for="geojson-upload-control">1. Upload your GeoJSON</label>
+          <input name="geojson-upload" type="file" class="form-control-file" id="geojson-upload-control" />
+          <small id="uploadhelp" class="form-text text-muted">Upload your flight plan GeoJSON from your GCS</small>
+          <br>
+
+          <label for="operator-name">2. Operator Name:</label>
+          <input id="operator-name" type="text" name="operator-name" />
+          <br>
+          <label for="op-datetime">3. Operation datetme:</label>
+          <input style="width:300px;" id="op-datetime" type="text" name="datetimes" />
+          <br>
+          <label for="operation_type">4. Operation Type</label>
+          <select name="operation_type" id="operation_type" class="form-control">
+            <option selected>Choose...</option>
+            <option value=0>VLOS</option>
+            <option value=1>BVLOS</option>
+          </select>
+          <br>
+
+          <input type="submit" />
+        </div>
+      </form>
+
+    </div>
+  </main>
+
+  <footer class="text-muted">
+    <br>
+    <div class="container">
+      <p class="float-right">
+        <a href="#">Back to top</a>
+      </p>
+      <p>Flight Launchpad</p>
+      <p>New to Flight Launchpad? <a href="../../">Visit the homepage</a> or read our <a
+          href="../../getting-started/">getting
+          started guide</a>.</p>
+    </div>
+  </footer>
+
+
+  <script type="application/javascript" src="/javascripts/jquery-3.6.0.slim.min.js" charset="utf-8"></script>
+  <script type="application/javascript" src="/javascripts/moment.min.js" charset="utf-8"></script>
+  <script type="application/javascript" src="/javascripts/bootstrap.bundle.min.js" charset="utf-8"></script>
+  <script type="application/javascript" src="/javascripts/daterangepicker.min.js" charset="utf-8"></script>
+
+  <script type="text/javascript">
+    $(function () {
+      $('input[name="datetimes"]').daterangepicker({
+        timePicker: true,
+        startDate: moment().startOf('hour'),
+        endDate: moment().startOf('hour').add(32, 'hour'),
+        locale: {
+          format: 'DD-MM-YY hh:mm A'
+        }
+      });
+    });
+    // var geoJSONToRead =document.getElementById('geojson-upload-control');
+  </script>
+</body>
+
+</html>

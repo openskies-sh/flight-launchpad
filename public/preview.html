@@ -1,9 +1,9 @@
+@@ -1,91 +0,0 @@
 <html>
 
 <head>
   <title>Flight Launchpad</title>
   <link rel="stylesheet" href="/stylesheets/bootstrap.min.css">
-  <link rel="stylesheet" href="/stylesheets/bootstrap-daterangepicker.css">
   <link rel="stylesheet" href="/stylesheets/style.css">
   <link rel="stylesheet" href="/stylesheets/leaflet.css">
 </head>
@@ -23,33 +23,8 @@
   </nav>
   <main role="main" class="container">    
       <div class="row">
-        <div class="col">
-        <form action="/upload" enctype="multipart/form-data" method="post">          
-          <div class="form-group">
-            <label for="geojson-upload-control">1. Upload your GeoJSON</label>
-            <input onchange="preview_operation()" type="file" class="form-control-file" id="geojson-upload-control">
-            <small id="uploadhelp" class="form-text text-muted">Upload your flight plan GeoJSON from your GCS</small>
-          </div>
-          
-          <div class="form-group">
-            <label for="op-datetime">2. Operation datetme:</label>
-            <input style="width:300px;" id="op-datetime" type="text" name="datetimes" />
-          </div>
-          
-          <label for="operation_type">3. Operation Type</label>
-          <select id="operation_type" class="form-control">
-            <option selected>Choose...</option>
-            <option value=0>VLOS</option>
-            <option value=1>BVLOS</option>
-          </select>
-          <hr>
-          <h5>Review</h5>
+        <h5>Review</h5>
           <div id="map"></div>
-          <br> <br>
-          <button type="submit" class="btn btn-primary">Submit Operation</button>
-          <br>
-        </form>
-        </div>
 
       </div>
   </main>
@@ -67,40 +42,10 @@
   </footer>
 
 
-
-  <script  type="application/javascript" src="/javascripts/webmap.js" charset="utf-8"></script>
   <script  type="application/javascript" src="/javascripts/jquery-3.6.0.slim.min.js" charset="utf-8"></script>
   <script  type="application/javascript" src="/javascripts/moment.min.js" charset="utf-8"></script>
   <script  type="application/javascript" src="/javascripts/bootstrap.bundle.min.js" charset="utf-8"></script>
-  <script  type="application/javascript"  src="/javascripts/daterangepicker.min.js" charset="utf-8"></script>
-  
-  <script type="text/javascript">
-   $(function() {
-  $('input[name="datetimes"]').daterangepicker({
-    timePicker: true,
-    startDate: moment().startOf('hour'),
-    endDate: moment().startOf('hour').add(32, 'hour'),
-    locale: {
-      format: 'DD-MM-YY hh:mm A'
-    }
-  });
-});
-// var geoJSONToRead =document.getElementById('geojson-upload-control');
-function preview_operation() {
-  
-  const file = document.getElementById('geojson-upload-control').files[0];
-  const reader = new FileReader();
 
-  reader.addEventListener("load", function () {
-    // convert image file to base64 string
-    console.log(reader.result);
-  }, false);
-
-  if (file) {
-    reader.readAsDataURL(file);
-  }
-}
- </script>
 </body>
 
 </html>
