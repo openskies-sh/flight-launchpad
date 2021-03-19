@@ -1,60 +1,61 @@
 var express = require('express');
 var router = express.Router();
 const formidable = require('formidable');
+
 let geojsonhint = require("@mapbox/geojsonhint");
 let fs = require('fs');
 const {
   check,
-  validationResult
+  validationResult,
+  matchedData
 } = require('express-validator');
 
 
 /* GET home page. */
 router.get('/', function (req, res, next) {
   res.render('index', {
-    title: 'Express'
+    data: {},
+    errors: {}
   });
 });
 
+var flight_operation_validate = [
+  check('operator_name').isLength({ min: 5, max:20 })
+  .withMessage("Operator name is required and must be more than 5 characters")
+  .trim(),
+  check('geojson_upload_control').custom(submitted_geo_json => {
+    
+    let options = {};
+    let errors = geojsonhint.hint(submitted_geo_json, options);
 
-router.post('/upload', (req, res, next) => {
+    if (errors.length > 0) {
+      console.log(errors);
+      throw new Error('Invalid GeoJSON supplied.');
+    } else {
+      return true;
+    }
+  })
+];
+
+router.post('/upload', flight_operation_validate, (req, res) => {
   //req.fields contains non-file fields 
   //req.files contains files 
   // res.send(JSON.stringify(req.fields));
   // const form = formidable({ multiples: true });
+  console.log(req.body)
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
 
-  // Data from form is valid.
-  const form = formidable.IncomingForm();
-  // form.parse(req);
+    res.render('index', {
+      data: req.data, 
+      errors: errors.mapped()
+    });
+  }
+  const data = matchedData(req);
+  // console.log("Sanitized: ", data);
 
-  form.parse(req, (err, fields, files) => {
-    res.writeHead(200, {'content-type': 'text/plain'});
-    if (err) {
-      next(err);
-      return;
-    }
-    
-  });
-  
-    form.on('file', function (name, file){
-      console.log('Uploaded ' + file.name);
-      let geo_json_file = files[0];
-      console.log(files)
-      fs.readFile(geo_json_file, function (err, data) {
-        res.end(data);
-      });
-      
-  });
-  return;
-  // res.rednder('preview', {
-  //   title: "Preview Operation",
-  //   errors: {},
-  //   data: {
-  //     // 'fields': fields,
-  //     // 'geojson': geojson
-  //   }
-  // });
-
+  req.flash("success", "Thanks for the message! I‘ll be in touch :)");
+  res.redirect("/");
 
 });
 

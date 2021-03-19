@@ -20,40 +20,11 @@
       </ul>
     </div>
   </nav>
-  <main role="main" class="container">
-    <div class="row">
-
-      <form action="upload" enctype="multipart/form-data" method="post">
-        <div class="form-group">
-          <label for="geojson-upload-control">1. Upload your GeoJSON</label>
-          <input name="geojson-upload-control" type="file" class="form-control-file" id="geojson-upload-control" />
-          <small id="uploadhelp" class="form-text text-muted">Upload your flight plan GeoJSON from your GCS</small>
-          <br>
-
-          <label for="operator_name">2. Operator Name:</label>
-          <input id="operator_name" type="text" name="operator_name" />
-          <br>
-          <label for="op-datetime">3. Operation datetme:</label>
-          <input style="width:300px;" id="op-datetime" type="text" name="datetimes" />
-          <br>
-          <label for="operation_type">4. Operation Type</label>
-          <select name="operation_type" id="operation_type" class="form-control">
-            <option selected>Choose...</option>
-            <option value="1">VLOS</option>
-            <option value="2">BVLOS</option>
-          </select>
-          <br>
-
-          <input type="submit" />
-        </div>
-      </form>
-
-    </div>
-  </main>
-
+  
+  <%- body %>
   <footer class="text-muted">
     <br>
-    <div class="container">
+    <div class="container-fluid">
       <p class="float-right">
         <a href="#">Back to top</a>
       </p>
@@ -69,6 +40,7 @@
   <script type="application/javascript" src="/javascripts/moment.min.js" charset="utf-8"></script>
   <script type="application/javascript" src="/javascripts/bootstrap.bundle.min.js" charset="utf-8"></script>
   <script type="application/javascript" src="/javascripts/daterangepicker.min.js" charset="utf-8"></script>
+  <script type="application/javascript" src="/javascripts/leaflet.js" charset="utf-8"></script>
 
   <script type="text/javascript">
     $(function () {
@@ -81,7 +53,45 @@
         }
       });
     });
-    // var geoJSONToRead =document.getElementById('geojson-upload-control');
+
+    // Creates a leaflet map binded to an html <div> with id "map"
+    // setView will set the initial map view to the location at coordinates
+    // 13 represents the initial zoom level with higher values being more zoomed in
+    var map = L.map('map').setView([43.659752, -79.378161], 2);
+
+    // Adds the basemap tiles to your web map
+    // Additional providers are available at: https://leaflet-extras.github.io/leaflet-providers/preview/
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+      attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+      subdomains: 'abcd',
+      maxZoom: 21
+    }).addTo(map);
+
+    var geojson_feature_layer = L.featureGroup().addTo(map);
+
+    function remove_spaces(string) {
+      return string.replace(/\n/g, "").replace(/ /g, '');
+
+    }
+
+    function update_geo_json() {
+      var geojson_control = document.getElementById('geojson_upload_control');
+      var geo_json = geojson_control.value;
+      try {
+        geojson_feature_layer.clearLayers();
+        let layer = L.geoJSON(JSON.parse(geo_json), {
+          "color": "#ff7800",
+          "weight": 5,
+          "opacity": 0.65
+        });
+        geojson_feature_layer.addLayer(layer);
+        map.fitBounds(geojson_feature_layer.getBounds());
+      } catch (err) {
+        console.log(err);
+        geojson_feature_layer.clearLayers();
+      }
+
+    }
   </script>
 </body>
 

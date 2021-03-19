@@ -5,12 +5,12 @@ body {
 .editor-datetime {
   position: relative;
 }
-.starter-template {
-  padding: 3rem 1.5rem;
-  text-align: center;
-}
+
 #map {
 	height: 250px;
-	width: 100%;
+  
 }
+mark{
+  background-color: #f1e7fe;
+  }
 

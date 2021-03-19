@@ -24,31 +24,9 @@
   <main role="main" class="container">    
       <div class="row">
         <div class="col">
-        <form action="/upload" enctype="multipart/form-data" method="post">          
-          <div class="form-group">
-            <label for="geojson-upload-control">1. Upload your GeoJSON</label>
-            <input onchange="preview_operation()" type="file" class="form-control-file" id="geojson-upload-control">
-            <small id="uploadhelp" class="form-text text-muted">Upload your flight plan GeoJSON from your GCS</small>
-          </div>
-          
-          <div class="form-group">
-            <label for="op-datetime">2. Operation datetme:</label>
-            <input style="width:300px;" id="op-datetime" type="text" name="datetimes" />
-          </div>
-          
-          <label for="operation_type">3. Operation Type</label>
-          <select id="operation_type" class="form-control">
-            <option selected>Choose...</option>
-            <option value=0>VLOS</option>
-            <option value=1>BVLOS</option>
-          </select>
-          <hr>
-          <h5>Review</h5>
-          <div id="map"></div>
-          <br> <br>
-          <button type="submit" class="btn btn-primary">Submit Operation</button>
-          <br>
-        </form>
+          <% if (messages.success) { %>
+            <div class="flash flash-success"><%= messages.success %></div>
+          <% } %>
         </div>
 
       </div>

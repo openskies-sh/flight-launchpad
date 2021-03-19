@@ -1,0 +1,56 @@
+
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-12">
+        <div class="form-header">
+          <% if (Object.keys(errors).length === 0) { %>
+            <h3>Submit a flight plan</h3>
+          <% } else { %>
+            <h3 class="errors-heading">Oops, please correct the following:</h3>
+            <ul class="errors-list ">
+              <% Object.values(errors).forEach(error => { %>
+                <li class=""><%= error.msg %></li>
+              <% }) %>
+            </ul>
+          <% } %>
+        </div>
+        <br>        
+        <form action="upload" method="post">
+          <div class="form-group <%= errors.message ? 'form-field-invalid' : '' %>">
+            <label for="geojson_upload_control"><mark>Paste Flightplan GeoJSON</mark></label>
+            <textarea onblur="this.value=remove_spaces(this.value);" onchange="update_geo_json()"
+              name="geojson_upload_control" rows="4" cols="50" class="form-control-file"
+              id="geojson_upload_control"></textarea>
+            <small id="uploadhelp" class="form-text text-muted">Paste your flight plan GeoJSON from your GCS, once you paste the map on the botton is updated</small>
+            <% if (errors.geojson_upload_control) { %>
+              <div class="error"><%= errors.geojson_upload_control.msg %></div>
+            <% } %>
+            <br>
+            <label for="operator_name"><mark>Operator Name</mark></label>
+            <input id="operator_name" type="text" name="operator_name" />
+            <br>
+            <label for="op-datetime"><mark>Operation datetme</mark></label>
+            <input style="width:320px;" id="op-datetime" type="text" name="datetimes" />
+            <br>
+            <label for="operation_type"><mark>Operation Type</mark></label>
+            <select name="operation_type" id="operation_type" class="form-control">
+              <option selected>Choose...</option>
+              <option value="1">VLOS</option>
+              <option value="2">BVLOS</option>
+            </select>
+            <br>
+          </div>
+
+          <input class="btn btn-primary" type="submit" value="Submit Flight Plan" />
+        </form>
+      </div>
+    </div>
+    <br>
+    <div class="row">
+      <div class="col-12">
+        <h6>Flight Plan Preview</h6>
+        <div id="map"></div>
+      </div>
+    </div>
+
+  </div>
