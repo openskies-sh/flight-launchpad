@@ -26,12 +26,12 @@
       <form action="upload" enctype="multipart/form-data" method="post">
         <div class="form-group">
           <label for="geojson-upload-control">1. Upload your GeoJSON</label>
-          <input name="geojson-upload" type="file" class="form-control-file" id="geojson-upload-control" />
+          <input name="geojson-upload-control" type="file" class="form-control-file" id="geojson-upload-control" />
           <small id="uploadhelp" class="form-text text-muted">Upload your flight plan GeoJSON from your GCS</small>
           <br>
 
-          <label for="operator-name">2. Operator Name:</label>
-          <input id="operator-name" type="text" name="operator-name" />
+          <label for="operator_name">2. Operator Name:</label>
+          <input id="operator_name" type="text" name="operator_name" />
           <br>
           <label for="op-datetime">3. Operation datetme:</label>
           <input style="width:300px;" id="op-datetime" type="text" name="datetimes" />
@@ -39,8 +39,8 @@
           <label for="operation_type">4. Operation Type</label>
           <select name="operation_type" id="operation_type" class="form-control">
             <option selected>Choose...</option>
-            <option value=0>VLOS</option>
-            <option value=1>BVLOS</option>
+            <option value="1">VLOS</option>
+            <option value="2">BVLOS</option>
           </select>
           <br>
 

@@ -1,8 +1,14 @@
 var express = require('express');
 var router = express.Router();
 const formidable = require('formidable');
+let geojsonhint = require("@mapbox/geojsonhint");
+let fs = require('fs');
+const {
+  check,
+  validationResult
+} = require('express-validator');
 
-const gjv = require("geojson-validation");
+
 /* GET home page. */
 router.get('/', function (req, res, next) {
   res.render('index', {
@@ -17,34 +23,30 @@ router.post('/upload', (req, res, next) => {
   // res.send(JSON.stringify(req.fields));
   // const form = formidable({ multiples: true });
 
-  var form = new formidable.IncomingForm();
-
-
+  // Data from form is valid.
+  const form = formidable.IncomingForm();
+  // form.parse(req);
 
   form.parse(req, (err, fields, files) => {
+    res.writeHead(200, {'content-type': 'text/plain'});
     if (err) {
       next(err);
       return;
     }
-    console.log(fields);
-    console.log(files);
     
+  });
   
-  res.render('preview', {
-    title: "Preview Operation",
-    errors: {},
-    data: {
-      'fields': fields,
-      // 'geojson': geojson
-    }
+    form.on('file', function (name, file){
+      console.log('Uploaded ' + file.name);
+      let geo_json_file = files[0];
+      console.log(files)
+      fs.readFile(geo_json_file, function (err, data) {
+        res.end(data);
+      });
+      
   });
-
-  });
-
   return;
-
-  
-  // res.render('preview', {
+  // res.rednder('preview', {
   //   title: "Preview Operation",
   //   errors: {},
   //   data: {
@@ -52,6 +54,8 @@ router.post('/upload', (req, res, next) => {
   //     // 'geojson': geojson
   //   }
   // });
+
+
 });
 
 router.get('/submit-operation', (req, res, next) => {
