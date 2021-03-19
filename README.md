@@ -1,2 +1,6 @@
 # flight-launchpad
- A tool to build and submit flight plans / operations
+ 
+Flight Launchpad is a front end tool to submit the following data to Flight Blender and Spotlight:
+    - Flight Declaration
+    - Geofences
+
