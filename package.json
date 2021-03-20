@@ -7,18 +7,17 @@
   },
   "dependencies": {
     "@mapbox/geojsonhint": "^3.0.0",
-    "bootstrap": "^4.6.0",
-    "cookie-parser": "~1.4.4",
+    "axios": "^0.21.1",
+    "cookie-parser": "^1.4.4",
     "csurf": "^1.10.0",
-    "debug": "~2.6.9",
+    "debug": "^2.6.9",
     "ejs": "^3.1.6",
     "express": "~4.16.1",
     "express-flash": "^0.0.2",
     "express-layout": "^0.1.0",
     "express-session": "^1.17.0",
     "express-validator": "^6.10.0",
-    "formidable": "1.2.2",
-    "helmet": "^3.21.2",
-    "morgan": "~1.9.1"
+    "luxon": "^1.26.0",
+    "morgan": "^1.9.1"
   }
 }
