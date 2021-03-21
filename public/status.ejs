@@ -21,15 +21,15 @@
       </ul>
     </div>
   </nav>
-  <main role="main" class="container">    
-      <div class="row">
-        <div class="col">
-          <% if (messages.success) { %>
-            <div class="flash flash-success"><%= messages.success %></div>
-          <% } %>
-        </div>
-
+  <main role="main" class="container">
+    <div class="row">
+      <div class="col">
+        <% if (messages.success) { %>
+        <div class="flash flash-success"><%= messages.success %></div>
+        <% } %>
       </div>
+
+    </div>
   </main>
 
   <footer class="text-muted">
@@ -39,31 +39,31 @@
         <a href="#">Back to top</a>
       </p>
       <p>Flight Launchpad</p>
-      <p>New to Flight Launchpad? <a href="../../">Visit the homepage</a> or read our <a href="../../getting-started/">getting
+      <p>New to Flight Launchpad? <a href="../../">Visit the homepage</a> or read our <a
+          href="../../getting-started/">getting
           started guide</a>.</p>
     </div>
   </footer>
 
 
-  <script  type="application/javascript" src="/javascripts/jquery-3.6.0.slim.min.js" charset="utf-8"></script>
-  <script  type="application/javascript" src="/javascripts/moment.min.js" charset="utf-8"></script>
-  <script  type="application/javascript" src="/javascripts/bootstrap.bundle.min.js" charset="utf-8"></script>
-  <script  type="application/javascript"  src="/javascripts/daterangepicker.min.js" charset="utf-8"></script>
-  
-  <script type="text/javascript">
-   $(function() {
-  $('input[name="datetimes"]').daterangepicker({
-    timePicker: true,
-    startDate: moment().startOf('hour'),
-    endDate: moment().startOf('hour').add(32, 'hour'),
-    locale: {
-      format: 'DD-MM-YY hh:mm A'
-    }
-  });
-});
-// var geoJSONToRead =document.getElementById('geojson-upload-control');
+  <script type="application/javascript" src="/javascripts/jquery-3.6.0.slim.min.js" charset="utf-8"></script>
+  <script type="application/javascript" src="/javascripts/moment.min.js" charset="utf-8"></script>
+  <script type="application/javascript" src="/javascripts/bootstrap.bundle.min.js" charset="utf-8"></script>
+  <script type="application/javascript" src="/javascripts/daterangepicker.min.js" charset="utf-8"></script>
 
- </script>
+  <script type="text/javascript">
+    $(function () {
+      $('input[name="datetimes"]').daterangepicker({
+        timePicker: true,
+        startDate: moment().startOf('hour'),
+        endDate: moment().startOf('hour').add(32, 'hour'),
+        locale: {
+          format: 'DD-MM-YY hh:mm A'
+        }
+      });
+    });
+    // var geoJSONToRead =document.getElementById('geojson-upload-control');
+  </script>
 </body>
 
 </html>

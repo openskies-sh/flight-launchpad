@@ -1,6 +1,15 @@
 var express = require('express');
 var router = express.Router();
-const { DateTime } = require("luxon");
+
+var async = require('async');
+const {
+  DateTime
+} = require("luxon");
+var redisclient = require('redis').createClient(process.env.REDIS_URL || {
+  host: '127.0.0.1',
+  port: 6379
+});
+
 let geojsonhint = require("@mapbox/geojsonhint");
 const {
   check,
@@ -8,7 +17,11 @@ const {
 } = require('express-validator');
 
 
+
 const axios = require('axios');
+const {
+  response
+} = require('../app');
 /* GET home page. */
 router.get('/', function (req, res, next) {
   res.render('index', {
@@ -17,12 +30,19 @@ router.get('/', function (req, res, next) {
   });
 });
 
+function get_passport_token() {
+
+}
+
 var flight_operation_validate = [
-  check('operator_name').isLength({ min: 5, max:20 })
+  check('operator_name').isLength({
+    min: 5,
+    max: 20
+  })
   .withMessage("Operator name is required and must be more than 5 characters")
   .trim(),
   check('geojson_upload_control').custom(submitted_geo_json => {
-    
+
     let options = {};
     let errors = geojsonhint.hint(submitted_geo_json, options);
 
@@ -36,81 +56,104 @@ var flight_operation_validate = [
 ];
 
 router.post('/upload', flight_operation_validate, (req, res) => {
-  //req.fields contains non-file fields 
-  //req.files contains files 
-  // res.send(JSON.stringify(req.fields));
-  // const form = able({ multiples: true });
-  // console.log(req.body)
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
+      //req.fields contains non-file fields 
+      //req.files contains files 
+      // res.send(JSON.stringify(req.fields));
+      // const form = able({ multiples: true });
+      // console.log(req.body)
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
 
-    res.render('index', {
-      data: req.data, 
-      errors: errors.mapped()
-    });
-  }
-  
-  
-  let date_range = req.body['datetimes'];
-  let date_split = date_range.split(' ');
-  let op_mode = req.body['operation_type'];
-  let op_name = req.body['operator_name'];
-  let geojson_upload = JSON.parse(req.body['geojson_upload_control']);
-  let start_date = DateTime.fromISO(date_split[0]);
-  let end_date = DateTime.fromISO(date_split[2]);
+        res.render('index', {
+          data: req.data,
+          errors: errors.mapped()
+        });
+      }
 
-  operation_mode_lookup = {'1':'vlos', '2':'bvlos'};
+      let date_range = req.body['datetimes'];
+      let date_split = date_range.split(' ');
+      let op_mode = req.body['operation_type'];
+      let op_name = req.body['operator_name'];
+      let geojson_upload = JSON.parse(req.body['geojson_upload_control']);
+      let start_date = DateTime.fromISO(date_split[0]);
+      let end_date = DateTime.fromISO(date_split[2]);
 
-  flight_declaration_json = {"start_time" :date_split[0], "end_time":date_split[1], "flight_declaration":{"exchange_type":"flight_declaration","originating_party": op_name, "flight_declaration":{"parts":geojson_upload}, "operation_mode":operation_mode_lookup[op_mode]}}
+      operation_mode_lookup = {
+        '1': 'vlos',
+        '2': 'bvlos'
+      };
+
+      flight_declaration_json = {
+        "start_time": date_split[0],
+        "end_time": date_split[1],
+        "flight_declaration": {
+          "exchange_type": "flight_declaration",
+          "originating_party": op_name,
+          "flight_declaration": {
+            "parts": geojson_upload
+          },
+          "operation_mode": operation_mode_lookup[op_mode]
+        }
+      }
 
 
-  
-  
-  const base_url = process.env.BLENDER_BASE_URL || 'http://local.test:8000';
-  let url = base_url + '/set_flight_declaration'
-  axios.post(url, flight_declaration_json, {
-    headers: {
-      'Content-Type': 'application/json'
-    }
-  })
-  .then(function (blender_response) {
+      key = 'passport_token';
+      redisclient.get(key, function (err, results) {
+        if (err || results == null) {
+          axios.request({
+            url: "/oauth/token/",
+            method: "post",
+            baseURL: process.env.PASSPORT_URL,
+            data: {
+              "client_id": process.env.PASSPORT_CLIENT_ID,
+              "client_secret": process.env.PASSPORT_CLIENT_SECRET,
+              "grant_type": "client_credentials",
+              "scope": process.env.PASSPORT_BLENDER_SCOPE,
+              "audience": process.env.PASSPORT_AUDIENCE
+            }
+          }).then(passport_response => {
+            console.log(passport_response)
+            if (passport_response.statusCode == 200) {
+              access_token = JSON.stringify(passport_response.data);
+              redisclient.set(key, access_token);
+              redisclient.expire(key, 3500);
 
-    res.render('status', {
-      title: "Acceptance Status",
-      errors: {},
-      data: blender_response
-    });
-  })
-  .catch(function (error) {
-    console.log(error)
+              return access_token;
+            } else {
 
-    res.render('error-in-submission', {
-      title: "Error in submission",
-      errors: error,
-      data: {}
-    });
-  });
+              return {
+                "error": "Error in Passport Query"
+              }
+            }
+          }).catch(err => {
+              console.log(err);
+              return {
+                "error": "Error in Passport Query"
+              } });
 
-  // req.flash("success", "Thanks for the message! I‘ll be in touch :)");
-  // res.redirect("/");
 
-});
 
-router.get('/submit-operation', (req, res, next) => {
-  res.render('status', {
-    title: "Acceptance Status",
-    errors: {},
-    data: {}
-  });
+          } else {
 
-});
-router.get('/operation-status', (req, res, next) => {
-  res.render('status', {
-    title: "Operation Status",
-    errors: {},
-    data: {}
-  });
+          }
 
-});
+      });
 
-module.exports = router;
+      router.get('/submit-operation', (req, res, next) => {
+        res.render('status', {
+          title: "Acceptance Status",
+          errors: {},
+          data: {}
+        });
+
+      });
+      router.get('/operation-status', (req, res, next) => {
+        res.render('status', {
+          title: "Operation Status",
+          errors: {},
+          data: {}
+        });
+
+      });
+
+      module.exports = router;
