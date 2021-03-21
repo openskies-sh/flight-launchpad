@@ -1,9 +1,12 @@
 
-<img src="https://i.imgur.com/zOB49qM.png" width="350">
+![launchpad-logo](images/flight-launchpad.png)
 
 
-Flight Launchpad is a front end tool to submit the following data to Flight Blender and Spotlight:
+Flight Launchpad is a front end tool to submit the following data to Flight Blender and Spotlight ecosystem:
 - Flight Declaration
 - Geofences
 
+## System diagram
+Flight Launchpad works seamlessly with Flight Blender and Spotlight and can be a front end to Flight Blender. 
 
+![openskies-stack](images/openskies-stack.png)
