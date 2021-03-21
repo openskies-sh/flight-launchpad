@@ -1,5 +1,5 @@
 
-<img src="images/flight-launchpad.png" width="80%">
+<img src="images/flight-launchpad.png" width="60%">
 
 
 Flight Launchpad is a front end tool to submit the following data to Flight Blender and Spotlight ecosystem:
