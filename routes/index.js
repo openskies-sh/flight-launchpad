@@ -107,7 +107,7 @@ router.post('/submit-declaration', flight_operation_validate, (req, res) => {
           url: "/oauth/token/",
           method: "post",
           header: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/x-www-form-urlencoded'
           },
           baseURL: process.env.PASSPORT_URL,
           data: {
@@ -161,7 +161,7 @@ router.post('/submit-declaration', flight_operation_validate, (req, res) => {
     let url = base_url + '/set_flight_declaration'
     axios.post(url, flight_declaration_json, {
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/x-www-form-urlencoded',
           'Authorization': "Bearer " + passport_token
         }
       })
@@ -222,7 +222,7 @@ router.get('/operation-status/:uuid', (req, res, next) => {
           url: "/oauth/token/",
           method: "post",
           header: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/x-www-form-urlencoded'
           },
           baseURL: process.env.PASSPORT_URL,
           data: {
@@ -278,7 +278,7 @@ router.get('/operation-status/:uuid', (req, res, next) => {
     axios.get(url, {
         headers: {
 
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/x-www-form-urlencoded',
           'Authorization': "Bearer " + passport_token
 
         }
