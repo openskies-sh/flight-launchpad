@@ -1,0 +1,9 @@
+
+    <div class="row">
+      <div class="col">
+        <% if (data) { %>
+        <div class="flash flash-success">Your declaration is submitted, it has not been approved, you can check the status of approval at the status page: <a href="/operation-status/<%= data.id %>"><%= data.id %></a></div>
+        <% } %>
+      </div>
+
+    </div>

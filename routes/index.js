@@ -22,6 +22,9 @@ const axios = require('axios');
 const {
   response
 } = require('../app');
+const {
+  token
+} = require('morgan');
 /* GET home page. */
 router.get('/', function (req, res, next) {
   res.render('index', {
@@ -30,9 +33,7 @@ router.get('/', function (req, res, next) {
   });
 });
 
-function get_passport_token() {
 
-}
 
 var flight_operation_validate = [
   check('operator_name').isLength({
@@ -55,105 +56,253 @@ var flight_operation_validate = [
   })
 ];
 
-router.post('/upload', flight_operation_validate, (req, res) => {
-      //req.fields contains non-file fields 
-      //req.files contains files 
-      // res.send(JSON.stringify(req.fields));
-      // const form = able({ multiples: true });
-      // console.log(req.body)
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
+router.post('/submit-declaration', flight_operation_validate, (req, res) => {
+  //req.fields contains non-file fields 
+  //req.files contains files 
+  // res.send(JSON.stringify(req.fields));
+  // const form = able({ multiples: true });
+  // console.log(req.body)
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
 
-        res.render('index', {
-          data: req.data,
-          errors: errors.mapped()
-        });
-      }
+    res.render('index', {
+      data: req.data,
+      errors: errors.mapped()
+    });
+  }
 
-      let date_range = req.body['datetimes'];
-      let date_split = date_range.split(' ');
-      let op_mode = req.body['operation_type'];
-      let op_name = req.body['operator_name'];
-      let geojson_upload = JSON.parse(req.body['geojson_upload_control']);
-      let start_date = DateTime.fromISO(date_split[0]);
-      let end_date = DateTime.fromISO(date_split[2]);
+  let date_range = req.body['datetimes'];
+  let date_split = date_range.split(' ');
+  let op_mode = req.body['operation_type'];
+  let op_name = req.body['operator_name'];
+  let geojson_upload = JSON.parse(req.body['geojson_upload_control']);
+  let start_date = DateTime.fromISO(date_split[0]);
+  let end_date = DateTime.fromISO(date_split[2]);
 
-      operation_mode_lookup = {
-        '1': 'vlos',
-        '2': 'bvlos'
-      };
+  operation_mode_lookup = {
+    '1': 'vlos',
+    '2': 'bvlos'
+  };
 
-      flight_declaration_json = {
-        "start_time": date_split[0],
-        "end_time": date_split[1],
-        "flight_declaration": {
-          "exchange_type": "flight_declaration",
-          "originating_party": op_name,
-          "flight_declaration": {
-            "parts": geojson_upload
+  flight_declaration_json = {
+    "start_time": date_split[0],
+    "end_time": date_split[2],
+    "flight_declaration": {
+      "exchange_type": "flight_declaration",
+      "originating_party": op_name,
+      "flight_declaration": {
+        "parts": geojson_upload
+      },
+      "operation_mode": operation_mode_lookup[op_mode]
+    }
+  };
+
+  redis_key = 'passport_token';
+
+  async.map([redis_key], function (r_key, done) {
+
+    redisclient.get(r_key, function (err, results) {
+      if (err || results == null) {
+        axios.request({
+          url: "/oauth/token/",
+          method: "post",
+          header: {
+            'Content-Type': 'application/json'
           },
-          "operation_mode": operation_mode_lookup[op_mode]
-        }
-      }
+          baseURL: process.env.PASSPORT_URL,
+          data: {
+            "client_id": process.env.PASSPORT_CLIENT_ID,
+            "client_secret": process.env.PASSPORT_CLIENT_SECRET,
+            "grant_type": "client_credentials",
+            "scope": process.env.PASSPORT_BLENDER_SCOPE,
+            "audience": process.env.PASSPORT_AUDIENCE
+          }
+        }).then(passport_response => {
 
+          if (passport_response.status == 200) {
+            let a_token = passport_response.data;
+            let access_token = JSON.stringify(a_token);
+            redisclient.set(r_key, access_token);
+            redisclient.expire(r_key, 3500);
 
-      key = 'passport_token';
-      redisclient.get(key, function (err, results) {
-        if (err || results == null) {
-          axios.request({
-            url: "/oauth/token/",
-            method: "post",
-            baseURL: process.env.PASSPORT_URL,
-            data: {
-              "client_id": process.env.PASSPORT_CLIENT_ID,
-              "client_secret": process.env.PASSPORT_CLIENT_SECRET,
-              "grant_type": "client_credentials",
-              "scope": process.env.PASSPORT_BLENDER_SCOPE,
-              "audience": process.env.PASSPORT_AUDIENCE
-            }
-          }).then(passport_response => {
-            console.log(passport_response)
-            if (passport_response.statusCode == 200) {
-              access_token = JSON.stringify(passport_response.data);
-              redisclient.set(key, access_token);
-              redisclient.expire(key, 3500);
-
-              return access_token;
-            } else {
-
-              return {
-                "error": "Error in Passport Query"
-              }
-            }
-          }).catch(err => {
-              console.log(err);
-              return {
-                "error": "Error in Passport Query"
-              } });
-
-
-
+            req.flash("success", "Thanks for the message! I‘ll be in touch :)");
+            res.redirect("/");
+            return done(null, a_token);
           } else {
 
+            return done(null, {
+              "error": "Error in Passport Query, response not 200"
+            });
           }
+        }).catch(axios_err => {
 
-      });
-
-      router.get('/submit-operation', (req, res, next) => {
-        res.render('status', {
-          title: "Acceptance Status",
-          errors: {},
-          data: {}
+          return done(null, {
+            "error": "Error in Passport Query, error in paramters supplied, check Client ID and / or secret"
+          });
         });
 
-      });
-      router.get('/operation-status', (req, res, next) => {
-        res.render('status', {
-          title: "Operation Status",
-          errors: {},
+      } else {
+        let a_token = JSON.parse(results);
+        return done(null, a_token);
+      }
+
+    });
+  }, function (error, redis_output) {
+
+    try {
+      var passport_token = redis_output[0]['access_token'];
+    } catch {
+      var passport_token = {
+        "error": "Error in parsing token, check redis client call"
+      }
+    }
+
+    const base_url = process.env.BLENDER_BASE_URL || 'http://local.test:8000';
+    let url = base_url + '/set_flight_declaration'
+    axios.post(url, flight_declaration_json, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': "Bearer " + passport_token
+        }
+      })
+      .then(function (blender_response) {
+        if (blender_response.status == 200) {
+          res.render('operation-submitted', {
+            title: "Acceptance Status",
+            errors: {},
+            data: blender_response.data
+          });
+        } else {
+
+          // console.log(error);
+          res.render('error-in-submission', {
+            title: "Error in submission",
+            errors: blender_response.data,
+            data: {}
+          })
+        }
+      })
+      .catch(function (error) {
+        // console.log(error);
+        res.render('error-in-submission', {
+          title: "Error in submission",
+          errors: error.data,
           data: {}
         });
-
       });
 
-      module.exports = router;
+    // req.flash("error", "There was a error in submisssion :/");
+    // res.redirect("/");
+
+
+
+
+  });
+  // return;
+
+
+});
+
+
+router.get('/operation-status/:uuid', (req, res, next) => {
+  let operationUUID = req.params.uuid;
+  const is_uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(operationUUID);
+  uuid_OK = (is_uuid) ? operationUUID : false;
+  if (!uuid_OK) {
+    res.status(400).send("No operation specified.");
+    return;
+  }
+  redis_key = 'passport_token';
+
+  async.map([redis_key], function (r_key, done) {
+
+    redisclient.get(r_key, function (err, results) {
+      if (err || results == null) {
+        axios.request({
+          url: "/oauth/token/",
+          method: "post",
+          header: {
+            'Content-Type': 'application/json'
+          },
+          baseURL: process.env.PASSPORT_URL,
+          data: {
+            "client_id": process.env.PASSPORT_CLIENT_ID,
+            "client_secret": process.env.PASSPORT_CLIENT_SECRET,
+            "grant_type": "client_credentials",
+            "scope": process.env.PASSPORT_BLENDER_SCOPE,
+            "audience": process.env.PASSPORT_AUDIENCE
+          }
+        }).then(passport_response => {
+
+          if (passport_response.status == 200) {
+            let a_token = passport_response.data;
+            let access_token = JSON.stringify(a_token);
+            redisclient.set(r_key, access_token);
+            redisclient.expire(r_key, 3500);
+
+            req.flash("success", "Thanks for the message! I‘ll be in touch :)");
+            res.redirect("/");
+            return done(null, a_token);
+          } else {
+
+            return done(null, {
+              "error": "Error in Passport Query, response not 200"
+            });
+          }
+        }).catch(axios_err => {
+
+          return done(null, {
+            "error": "Error in Passport Query, error in paramters supplied, check Client ID and / or secret"
+          });
+        });
+
+      } else {
+        let a_token = JSON.parse(results);
+        return done(null, a_token);
+      }
+
+    });
+  }, function (error, redis_output) {
+
+    try {
+      var passport_token = redis_output[0]['access_token'];
+    } catch {
+      var passport_token = {
+        "error": "Error in parsing token, check redis client call"
+      }
+    }
+
+    const base_url = process.env.BLENDER_BASE_URL || 'http://local.test:8000';
+    let url = base_url + '/flight_declaration/' + operationUUID;
+
+    axios.get(url, {
+        headers: {
+
+          'Content-Type': 'application/json',
+          'Authorization': "Bearer " + passport_token
+
+        }
+      }).then(function (blender_response) {
+        
+        if (blender_response.status == 200) {
+          res.render('status', {
+            title: "Operation Status",
+            errors: {},
+            data: blender_response.data
+          });
+        } else {
+
+          console.log(blender_response.data);
+          res.render('error-in-submission', {
+            title: "Error in submission",
+            errors: blender_response.data,
+            data: {}
+          })
+        }
+      });
+
+  });
+
+});
+
+module.exports = router;
