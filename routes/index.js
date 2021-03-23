@@ -40,8 +40,8 @@ var flight_operation_validate = [
     min: 5,
     max: 20
   })
-  .withMessage("Operator name is required and must be more than 5 characters")
-  .trim(),
+    .withMessage("Operator name is required and must be more than 5 characters")
+    .trim(),
   check('geojson_upload_control').custom(submitted_geo_json => {
 
     let options = {};
@@ -83,6 +83,15 @@ router.post('/submit-declaration', flight_operation_validate, (req, res) => {
     '1': 'vlos',
     '2': 'bvlos'
   };
+  let geo_json_with_altitude = { 'type': 'FeatureCollection', 'features': [] };
+  let geo_json_features = geojson_upload['features'];
+  let geo_json_features_length = geo_json_features.length;
+  for (let index = 0; index < geo_json_features_length; index++) {
+    const geo_json_feature = geo_json_features[index];
+    var properties = { 'min_altitude': { 'meters': 30, "datum": "agl" }, 'max_altitude': { 'meters': 100, 'datum': "agl" } };
+    geo_json_feature['properties'] = properties;
+    geo_json_with_altitude['features'].push(geo_json_feature)
+  }
 
   flight_declaration_json = {
     "start_time": date_split[0],
@@ -91,7 +100,7 @@ router.post('/submit-declaration', flight_operation_validate, (req, res) => {
       "exchange_type": "flight_declaration",
       "originating_party": op_name,
       "flight_declaration": {
-        "parts": geojson_upload
+        "parts": geo_json_with_altitude
       },
       "operation_mode": operation_mode_lookup[op_mode]
     }
@@ -161,11 +170,11 @@ router.post('/submit-declaration', flight_operation_validate, (req, res) => {
     const base_url = process.env.BLENDER_BASE_URL || 'http://local.test:8000';
     let url = base_url + '/set_flight_declaration'
     axios.post(url, flight_declaration_json, {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': "Bearer " + passport_token
-        }
-      })
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': "Bearer " + passport_token
+      }
+    })
       .then(function (blender_response) {
         if (blender_response.status == 200) {
           res.render('operation-submitted', {
@@ -277,30 +286,30 @@ router.get('/operation-status/:uuid', (req, res, next) => {
     let url = base_url + '/flight_declaration/' + operationUUID;
 
     axios.get(url, {
-        headers: {
+      headers: {
 
-          'Content-Type': 'application/json',
-          'Authorization': "Bearer " + passport_token
+        'Content-Type': 'application/json',
+        'Authorization': "Bearer " + passport_token
 
-        }
-      }).then(function (blender_response) {
-        
-        if (blender_response.status == 200) {
-          res.render('status', {
-            title: "Operation Status",
-            errors: {},
-            data: blender_response.data
-          });
-        } else {
+      }
+    }).then(function (blender_response) {
 
-          console.log(blender_response.data);
-          res.render('error-in-submission', {
-            title: "Error in submission",
-            errors: blender_response.data,
-            data: {}
-          })
-        }
-      });
+      if (blender_response.status == 200) {
+        res.render('status', {
+          title: "Operation Status",
+          errors: {},
+          data: blender_response.data
+        });
+      } else {
+
+        console.log(blender_response.data);
+        res.render('error-in-submission', {
+          title: "Error in submission",
+          errors: blender_response.data,
+          data: {}
+        })
+      }
+    });
 
   });
 
