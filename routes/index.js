@@ -1,6 +1,6 @@
 var express = require('express');
 var router = express.Router();
-
+const qs = require('qs');
 var async = require('async');
 const {
   DateTime
@@ -103,6 +103,13 @@ router.post('/submit-declaration', flight_operation_validate, (req, res) => {
 
     redisclient.get(r_key, function (err, results) {
       if (err || results == null) {
+        let post_data = {
+          "client_id": process.env.PASSPORT_CLIENT_ID,
+          "client_secret": process.env.PASSPORT_CLIENT_SECRET,
+          "grant_type": "client_credentials",
+          "scope": process.env.PASSPORT_BLENDER_SCOPE,
+          "audience": process.env.PASSPORT_AUDIENCE
+        };
         axios.request({
           url: "/oauth/token/",
           method: "post",
@@ -110,13 +117,7 @@ router.post('/submit-declaration', flight_operation_validate, (req, res) => {
             'Content-Type': 'application/x-www-form-urlencoded'
           },
           baseURL: process.env.PASSPORT_URL,
-          data: {
-            "client_id": process.env.PASSPORT_CLIENT_ID,
-            "client_secret": process.env.PASSPORT_CLIENT_SECRET,
-            "grant_type": "client_credentials",
-            "scope": process.env.PASSPORT_BLENDER_SCOPE,
-            "audience": process.env.PASSPORT_AUDIENCE
-          }
+          data: qs.stringify(post_data)
         }).then(passport_response => {
 
           if (passport_response.status == 200) {
@@ -161,7 +162,7 @@ router.post('/submit-declaration', flight_operation_validate, (req, res) => {
     let url = base_url + '/set_flight_declaration'
     axios.post(url, flight_declaration_json, {
         headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
+          'Content-Type': 'application/json',
           'Authorization': "Bearer " + passport_token
         }
       })
@@ -278,7 +279,7 @@ router.get('/operation-status/:uuid', (req, res, next) => {
     axios.get(url, {
         headers: {
 
-          'Content-Type': 'application/x-www-form-urlencoded',
+          'Content-Type': 'application/json',
           'Authorization': "Bearer " + passport_token
 
         }
