@@ -193,7 +193,7 @@ router.post('/submit-declaration', flight_operation_validate, asyncMiddleware(as
 
 
       const base_url = process.env.BLENDER_BASE_URL || 'http://local.test:8000';
-      let url = base_url + '/set_flight_declaration'
+      let url = base_url + '/flight_declaration_ops/set_flight_declaration'
       axios.post(url, flight_declaration_json, {
           headers: {
             'Content-Type': 'application/json',
@@ -245,7 +245,7 @@ router.post('/submit-declaration', flight_operation_validate, asyncMiddleware(as
 
 
       const base_url = process.env.BLENDER_BASE_URL || 'http://local.test:8000';
-      let url = base_url + '/flight_declaration/' + operationUUID;
+      let url = base_url + '/flight_declaration_ops/flight_declaration/' + operationUUID;
 
       axios.get(url, {
         headers: {
